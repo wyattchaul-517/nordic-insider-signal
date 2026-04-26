@@ -1,0 +1,94 @@
+# ============================================================
+# DAZED — Nordic Insider Clustering Strategy
+# Parameter Lock Date: 2026-04-24
+# ============================================================
+# RULE: Do not modify these values after the first backtest run.
+# If logic changes, create a new version file (strategy_v2.yaml).
+# Changing parameters after seeing backtest results = overfitting.
+# ============================================================
+
+version: "1.0"
+
+# ── Signal Detection ────────────────────────────────────────
+signal:
+  insider_window_days: 30        # Rolling window for clustering
+  min_distinct_insiders: 2       # Must be 2+ different people, not same person twice
+  transaction_type: "buy"        # Only track purchases, not disposals
+
+# ── Layer 0: Macro Environment (0–15 pts) ───────────────────
+macro:
+  min_breadth_pct: 40            # % of OMX stocks above 200MA must exceed this
+  riksbank_crisis_veto: true     # Hard veto if Riksbank emergency rate action in last 30d
+
+# ── Layer 1: Sector Health (0–20 pts) ───────────────────────
+sector:
+  max_drawdown_pct_3m: -15.0     # Sector ETF max 3-month drawdown before penalty
+  systemic_risk_veto: true       # Hard veto if sector flagged for regulatory risk
+
+# ── Layer 2: Fundamental Quality (0–35 pts) ─────────────────
+fundamentals:
+  max_debt_equity: 3.0
+  min_cash_runway_months: 12
+  require_nonnegative_revenue_trend: true  # YoY revenue must be flat or growing
+  fraud_investigation_veto: true           # Hard veto — no exceptions
+
+# ── Layer 3: Insider Signal Quality (0–30 pts) ──────────────
+insider:
+  ceo_cfo_bonus_pts: 10
+  board_member_pts: 5
+  min_purchase_salary_pct: 10    # Purchase < 10% of est. annual salary = no bonus
+  salary_significance_pts: 5
+  no_prior_selling_window_days: 180
+  prior_selling_penalty_pts: 5
+
+# ── Risk Deductions (subtracted from total score) ───────────
+risk_deductions:
+  earnings_within_days: 5
+  earnings_deduction_pts: 20
+  unlock_within_days: 10         # Restricted shares / lock-up expiry
+  unlock_deduction_pts: 15
+  rights_issue_within_days: 20   # Dilution event proximity
+  rights_issue_deduction_pts: 10
+
+# ── Trade Entry Gate ────────────────────────────────────────
+entry:
+  min_conviction_score: 65       # Hard minimum — no trades below this
+
+# ── Position Sizing ─────────────────────────────────────────
+position:
+  max_pct_of_adv: 2.0            # Position size capped at 2% of 20-day avg daily volume
+  adv_lookback_days: 20
+  max_portfolio_pct: 7.0         # Max single position as % of total portfolio
+  max_open_positions: 6
+  use_half_kelly: true           # Full Kelly is too aggressive for live trading
+
+# ── Exit Rules ──────────────────────────────────────────────
+exit:
+  time_stop_trading_days: 30     # Hard exit after 30 trading days regardless
+  stop_loss_pct: -10.0
+  profit_target_pct: 15.0
+  thesis_invalidation:           # Exit immediately if any of these occur
+    - "insider_sell_post_entry"
+    - "earnings_miss_large"
+    - "fraud_investigation_opened"
+
+# ── Universe Filters ────────────────────────────────────────
+universe:
+  min_adv_sek: 500000            # Minimum 500K SEK average daily volume
+  min_market_cap_sek: 200000000  # Minimum 200M SEK market cap
+  exchanges: ["ST"]              # Nasdaq Stockholm — expand later if needed
+  include_delisted: true         # Backtest must include delisted stocks
+
+# ── Data Sources ────────────────────────────────────────────
+data:
+  price_source: "yfinance"
+  fundamental_source: "yahoo_finance"   # Upgrade to "borsdata" after validation
+  fi_report_delay_days: 3              # Conservative delay — use report_date not transaction_date
+
+# ── Backtest Windows ────────────────────────────────────────
+backtest:
+  train_start: "2019-01-01"
+  train_end:   "2022-12-31"
+  validate_start: "2023-01-01"
+  validate_end:   "2024-12-31"
+  # 2025-01-01 onward: untouched until live deployment
