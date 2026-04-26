@@ -1,8 +1,43 @@
+# Secrets & credentials
 .env
+.env.*
+
+# Database files
 *.db
+*.sqlite
+*.sqlite3
+
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
 *.pyo
-data/*.db
+*.pyd
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+
+# Virtual environments
 .venv/
+venv/
+env/
+
+# Testing & coverage
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+
+# Logs
+*.log
+logs/
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Claude Code internal
 .claude/
