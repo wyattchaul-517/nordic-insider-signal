@@ -41,3 +41,23 @@ Thumbs.db
 
 # Claude Code internal
 .claude/
+
+# Data files
+*.csv
+*.xlsx
+*.xls
+*.json
+
+# Jupyter
+.ipynb_checkpoints/
+data/cache/
+
+# Data files
+*.csv
+*.xlsx
+*.xls
+*.parquet
+
+# Jupyter
+.ipynb_checkpoints/
+data/cache/
